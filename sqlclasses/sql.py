@@ -264,8 +264,9 @@ def ensure_identifyer(i, quote=None):
     elif type(i) == str:
         name = i
     else:
-        raise TypeError("Identifyers must either be Identifyer "
-                        "instances or strings. (Maybe user .name?)")
+        raise TypeError(f"Identifyers must either be Identifyer "
+                        f"instances or strings not {type(i)}. "
+                        f"(Maybe user .name?)")
 
     return Identifyer(name, quote)
 
@@ -769,6 +770,16 @@ class insert(Command):
 
         if len(values) == 0:
             raise ValueError("You must supply values to an insert statement")
+
+    @classmethod
+    def from_dict(insert, relation, *dicts):
+        """
+        Construct an INSERT command using the (first) dicts’ keys
+        as column names and expecting the following dicts to provide
+        data for each column.
+        """
+        columns = [ column(name) for name in dicts[0].keys() ]
+        return insert(relation, columns, dicts)
 
     def sql(self):
         relation = self._relation
