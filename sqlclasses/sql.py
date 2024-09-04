@@ -59,7 +59,7 @@ def space_separated(parts):
     return separated(" ", parts)
 
 
-class Backend:
+class Backend(object):
     """
     This class provies all the methods needed for a datasource to work
     with an SQL backend.  This class' instances will work for most
@@ -109,6 +109,11 @@ class Backend:
 
         return string
 
+    def rollup(self, *sql, debug=False):
+        sql_buffer = SQLBuffer(self, debug)
+        sql_buffer.print(*sql)
+        return ( sql_buffer.sql, sql_buffer.parameters, )
+
 
     # This function is set in the constructur
     #
@@ -154,7 +159,7 @@ class Part:
         return self.sql()
 
     def __repr__(self):
-        sql, params = rollup(debug_backend, self, debug=True)
+        sql, params = debug_backend.rollup(self, debug=True)
         return "%s: <%s>" % ( self.__class__.__name__, sql, )
 
 
@@ -205,10 +210,10 @@ class SQLBuffer:
         return tuple(self._parameters)
 
 def rollup(backend, *sql, debug=False):
-    sql_buffer = SQLBuffer(backend, debug)
-    sql_buffer.print(*sql)
-    return ( sql_buffer.sql, sql_buffer.parameters, )
-
+    """
+    Moved to backend.rollup(). kept for compatibility.
+    """
+    return backend.rollup(*sql, debug=debug)
 
 
 class Statement(Part):
