@@ -472,6 +472,9 @@ class expression(Part):
 
         return ret
 
+class Query(expression):
+    pass
+
 class as_(expression):
     """
     Encapsulates an expression that goes into an AS statement in a
@@ -714,6 +717,14 @@ class select(Statement):
                  " ",
                  space_separated(self._clauses), )
 
+class with_(Query):
+    def __init__(self, *views:Sequence[tuple[str, select]]):
+        self.views = views
+
+    def sql(self):
+        return ( "WITH ",
+                 comma_separated([ [ name, " AS (", select, ")", ]
+                                   for name, select in self.views ]), )
 
 class group_by(Clause):
     """
