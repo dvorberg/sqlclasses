@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sqlclasses",
-    version="1.2",
+    version="1.4",
     author="Diedrich Vorberg",
     author_email="diedrich@tux4web.de",
     description="Construct SQL commands and queries using Python classes.",
