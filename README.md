@@ -5,7 +5,7 @@ Construct SQL commands and queries using Python classes.
 from sqlclasses import sql
 
 login = "me"
-password = "secred"
+password = "secret"
 
 query = sql.select( ("firstname", "lastname", "login",),
                     ("users",),
@@ -15,7 +15,7 @@ query = sql.select( ("firstname", "lastname", "login",),
 
 print(repr(query))
 
-# >> select: <SELECT firstname, lastname, login FROM users WHERE login = 'me' AND password = 'secred'>
+# >> select: <SELECT firstname, lastname, login FROM users WHERE login = 'me' AND password = 'secret'>
 
 ```
 
