@@ -37,7 +37,7 @@ NULL = "NULL"
 
 whitespace_re = re.compile(r"\s+")
 def normalize_whitespace(s):
-    return whitespace_re.sub(s, " ").strip()
+    return whitespace_re.sub(" ", s).strip()
 
 def separated(char, parts):
     ret = list()
@@ -92,11 +92,11 @@ class Backend(object):
         self.param_placeholder = self._param_placeholder_function(
             dbi_module.paramstyle)
 
-
-    # These are used mostly for debugging.
+    # This is used for some identifiers that get sent to he backend.
     def quote_identifyer(self, name):
         return ( '"', name, '"', )
 
+    # quote_string() and escape_string() are only used for debugging.
     def quote_string(self, string):
         return ( "'", string, "'", )
 
