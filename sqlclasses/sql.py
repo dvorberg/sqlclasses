@@ -861,3 +861,16 @@ class delete(Command):
 
     def sql(self):
         return [ "DELETE FROM ", self._relation, " ", self._where_clause, ]
+
+def join_tokens(lst, sep):
+    """
+    Return a list like [ lst[0], sep, lst[1], set, …, lst[-1], ]
+    """
+    ret = []
+    for a in lst:
+        ret.append(a)
+        ret.append(sep)
+
+    ret.pop()
+
+    return ret
