@@ -718,13 +718,15 @@ class select(Statement):
                  space_separated(self._clauses), )
 
 class with_(Query):
-    def __init__(self, *views:Sequence[tuple[str, select]]):
+    def __init__(self, views:Sequence[tuple[str, select]], base_select=None):
         self.views = views
+        self.base_select = base_select
 
     def sql(self):
         return ( "WITH ",
                  comma_separated([ [ name, " AS (", select, ")", ]
-                                   for name, select in self.views ]), )
+                                   for name, select in self.views ]),
+                 self.base_select, )
 
 class group_by(Clause):
     """
