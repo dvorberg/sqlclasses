@@ -162,6 +162,23 @@ class Part:
         sql, params = debug_backend.rollup(self, debug=True)
         return "%s: <%s>" % ( self.__class__.__name__, sql, )
 
+class Combination(Part):
+    """
+    Holds a combination of parts that can be concatenated. An expression
+    is a combination and the WITH-stement with the following SELECT.
+    """
+    def __init__(self, *parts):
+        self._parts = parts
+
+    def sql(self):
+        return self._parts
+
+    def __add__(self, other):
+        ret = expression()
+        ret.parts = self._parts + other._parts
+
+        return ret
+
 
 class Parameter:
     def __init__(self, value):
@@ -186,7 +203,9 @@ class SQLBuffer:
             kw["end"] = ""
 
         for a in args:
-            if isinstance(a, Parameter):
+            if a is None:
+                pass
+            elif isinstance(a, Parameter):
                 self._parameters.append(a.value)
                 print(self.backend.param_placeholder(len(self._parameters)),
                       file=self._sql, **kw)
@@ -455,22 +474,12 @@ class column(Part):
         return self._quote
 
 
-class expression(Part):
+class expression(Combination):
     """
     Encapsolate an SQL expression like an arithmetic expression or a
     function call.
     """
-    def __init__(self, *parts):
-        self._parts = parts
-
-    def sql(self):
-        return self._parts
-
-    def __add__(self, other):
-        ret = expression()
-        ret.parts = self._parts + other._parts
-
-        return ret
+    pass
 
 class Query(expression):
     pass
@@ -718,15 +727,29 @@ class select(Statement):
                  space_separated(self._clauses), )
 
 class with_(Query):
-    def __init__(self, views:Sequence[tuple[str, select]], base_select=None):
+    # Used like:
+    #
+    # rollup_sql(sql.with_( ("name", sql.select(...) )
+    #            sql.select( ("col", "col", …), ("name"), sql.where(...) )
+    #
+    # One may write sql.with_(…) + sql.select(…) to combine both into
+    # a single object.
+    #
+    def __init__(self, *views:Sequence[tuple[str, select]]):
+        # , base_select=None
         self.views = views
-        self.base_select = base_select
+        self.base_select = None # base_select
 
     def sql(self):
         return ( "WITH ",
                  comma_separated([ [ name, " AS (", select, ")", ]
                                    for name, select in self.views ]),
                  self.base_select, )
+
+    def __add__(self, select_command):
+        assert isinstance(select_command, select), TypeError
+        return sql.Combination(self, " ", select_command)
+
 
 class group_by(Clause):
     """
