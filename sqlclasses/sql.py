@@ -729,16 +729,19 @@ class select(Statement):
 class with_(Query):
     # Used like:
     #
-    # rollup_sql(sql.with_( ("name", sql.select(...) )
+    # rollup_sql(sql.with_( ("name", sql.select(...) ),
     #            sql.select( ("col", "col", …), ("name"), sql.where(...) )
     #
     # One may write sql.with_(…) + sql.select(…) to combine both into
     # a single object.
     #
-    def __init__(self, *views:Sequence[tuple[str, select]]):
-        # , base_select=None
-        self.views = views
-        self.base_select = None # base_select
+    def __init__(self, *args:Sequence[tuple[str, select]]|select):
+        if isinstance(args[-1], select):
+            self.views = args[:-1]
+            self.base_select = args[-1]
+        else:
+            self.views = args
+            self.base_select = None # base_select
 
     def sql(self):
         return ( "WITH ",
